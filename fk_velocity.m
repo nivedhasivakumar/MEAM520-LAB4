@@ -74,7 +74,7 @@ R_0_2 = A1(1:3,1:3) * A2(1:3,1:3);
 R_0_3 = A1(1:3,1:3) * A2(1:3,1:3) * A3(1:3,1:3);
 R_0_4 = A1(1:3,1:3) * A2(1:3,1:3) * A3(1:3,1:3) * A4(1:3,1:3);
 
-z_for_omega = Tnew(1:3,3);
+z_for_omega = [0; 0; 1]; % z_for_omega is always this value
 omega_1 = z_for_omega;
 omega_2 = R_0_1 * z_for_omega;
 omega_3 = R_0_2 * z_for_omega;
