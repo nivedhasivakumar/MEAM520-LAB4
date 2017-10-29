@@ -58,15 +58,6 @@ Jacobian_v = [xdiff; ydiff; zdiff];
 
 % pretty(Jacobian_v)
 
-syms theta1(t) theta2(t) theta3(t) theta4(t) theta5(t) t
-theta1(t) = theta1;
-theta2(t) = theta2;
-theta3(t) = theta3;
-theta4(t) = theta4;
-theta5(t) = theta5;
-
-body_lin_velocity = Jacobian_v*[diff(theta1(t), t); diff(theta2(t), t); diff(theta3(t), t); diff(theta4(t), t); diff(theta5(t), t)];
-
 %% Finding Jacobian for forward angular velocity kinematics
 
 R_0_1 = A1(1:3,1:3);
@@ -85,11 +76,33 @@ Jacobian_w = [omega_1, omega_2, omega_3, omega_4, omega_5];
 
 % pretty(Jacobian_v)
 
-body_ang_velocity = Jacobian_w*[diff(theta1(t), t); diff(theta2(t), t); diff(theta3(t), t); diff(theta4(t), t); diff(theta5(t), t)];
-
-%% Finding final Jacobian
+%% Finding final Jacobian and body velocity
 
 Jacobian = [Jacobian_v; Jacobian_w];
+
+syms theta1(t) theta2(t) theta3(t) theta4(t) theta5(t) t
+theta1(t) = theta1;
+theta2(t) = theta2;
+theta3(t) = theta3;
+theta4(t) = theta4;
+theta5(t) = theta5;
+body_velocity = Jacobian*[diff(theta1(t), t); diff(theta2(t), t); diff(theta3(t), t); diff(theta4(t), t); diff(theta5(t), t)];
+
+%% Finding inverse velocity kinematics
+
+% Check if rank of the Jacobian matrix is 6. Only then would the inverse
+% below be computable, and a solution would exist.
+
+if rank(Jacobian) == 6
+    % Finding the pseudo-inverse
+    print 'Solution exists'
+    Jacobian_plus = Jacobian'* inv(Jacobian * Jacobian');
+    qdot = Jacobian_plus * body_velocity;
+else
+    print 'Rank of the Jacobian is not 6, hence no solution exists'
+end
+
+
 
 
 
