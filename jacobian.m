@@ -8,12 +8,12 @@ theta4 = q(4);
 theta5 = q(5);
 theta6 = q(6);
 
-L1 = 76.2;
-L2 = 146.05;
-L3 = 184.15;
-L4 = 0;
-L5 = 89;
-L6 = 0;
+L1 = 3*25.4;
+L2 = 5.75*25.4;
+L3 = 7.375*25.4;
+L4 = 1.75*25.4;
+L5 = 1.25*25.4;
+L6 = 1.125*25.4;
 
 % syms theta1 theta2 theta3 theta4 theta5 L1 L2 L3 L4 L5 L6 reals
 
@@ -24,13 +24,13 @@ A1 = [cos(theta1)    0  -sin(theta1) 0;
        0             0     0        1];
           
 %Frame 2 w.r.t Frame 1          
-A2 = [ sin(theta2)  cos(theta2)  0   L2*cos(theta2);
-      -cos(theta2)  sin(theta2)  0   L2*-cos(theta2);
+A2 = [ sin(theta2)  cos(theta2)  0   L2*sin(theta2);
+      -cos(theta2)  sin(theta2)  0   -L2*cos(theta2);
          0              0        1          0;
          0              0        0          1];
 
 %Frame 3 w.r.t Frame 2
-A3 = [-sin(theta3) -cos(theta3)  0   L3*-sin(theta3);
+A3 = [-sin(theta3) -cos(theta3)  0   -L3*sin(theta3);
       cos(theta3)  -sin(theta3)  0   L3*cos(theta3);
        0                0        1          0;
        0                0        0          1];
@@ -60,94 +60,109 @@ T(:,:,3) = A3;
 T(:,:,4) = A4;
 T(:,:,5) = A5;
 T(:,:,6) = A6;
- 
-% % % Find final transformation matrix for Lynx
-% Tnew = A1;
-% 
-% % % Holds translations of transformation matrices
-% translation = Tnew(1:3,4);
+
+% % Find final transformation matrix for Lynx
+T6 = A1*A2*A3*A4*A5*A6;
+T5 = A1*A2*A3*A4*A5;
+T4 = A1*A2*A3*A4;
+T3 = A1*A2*A3;
+T2 = A1*A2;
+T1 = A1;
+
+% % Holds translations of transformation matrices
+translation1 = T1(1:3,4);
+translation2 = T2(1:3,4);
+translation3 = T3(1:3,4);
+translation4 = T4(1:3,4);
+translation5 = T5(1:3,4);
+translation6 = T6(1:3,4);
 
 %% Finding Jacobian for forward linear velocity kinematics
-% xdiff = [diff(translation(1),theta1)];
-% ydiff = [diff(translation(2),theta1)];
-% zdiff = [diff(translation(3),theta1)];
+% xdiff = [diff(translation2(1),theta1)];
+% ydiff = [diff(translation2(2),theta1)];
+% zdiff = [diff(translation2(3),theta1)];
 % 
 % lin_vel = [xdiff; ydiff; zdiff]
 
 if(n == 5)
-    xcomp1 = (cos(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)) + sin(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)))*(L4 + L5) - L2*cos(theta2)*sin(theta1) - L3*cos(theta2)*cos(theta3)*sin(theta1) + L3*sin(theta1)*sin(theta2)*sin(theta3);
-    xcomp2 = - (cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)))*(L4 + L5) - L2*cos(theta1)*sin(theta2) - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
-    xcomp3 = - (cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)))*(L4 + L5) - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
-    xcomp4 = -(cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)))*(L4 + L5);
+    xcomp1 = (cos(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)) + sin(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)))*(L4 + L5) + L6*(cos(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)) + sin(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2))) - L2*sin(theta1)*sin(theta2) - L3*cos(theta2)*cos(theta3)*sin(theta1) + L3*sin(theta1)*sin(theta2)*sin(theta3);
+    xcomp2 = L2*cos(theta1)*cos(theta2) - (cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)))*(L4 + L5) - L6*(cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3))) - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
+    xcomp3 = - L6*(cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3))) - (cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)))*(L4 + L5) - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
+    xcomp4 = - L6*(cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3))) - (cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)))*(L4 + L5);
     xcomp5 = 0;
     xdiff = [xcomp1, xcomp2, xcomp3, xcomp4, xcomp5];
 
-    ycomp1 = L2*cos(theta1)*cos(theta2) - (cos(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)) + sin(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)))*(L4 + L5) + L3*cos(theta1)*cos(theta2)*cos(theta3) - L3*cos(theta1)*sin(theta2)*sin(theta3);
-    ycomp2 = - (cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)))*(L4 + L5) - L2*sin(theta1)*sin(theta2) - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
-    ycomp3 = - (cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)))*(L4 + L5) - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
-    ycomp4 = -(cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)))*(L4 + L5);
+    ycomp1 = L2*cos(theta1)*sin(theta2) - (cos(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)) + sin(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)))*(L4 + L5) - L6*(cos(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)) + sin(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2))) + L3*cos(theta1)*cos(theta2)*cos(theta3) - L3*cos(theta1)*sin(theta2)*sin(theta3);
+    ycomp2 = L2*cos(theta2)*sin(theta1) - L6*(cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1))) - (cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)))*(L4 + L5) - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
+    ycomp3 = - (cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)))*(L4 + L5) - L6*(cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1))) - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
+    ycomp4 = - (cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)))*(L4 + L5) - L6*(cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)));
     ycomp5 = 0;
     ydiff = [ycomp1, ycomp2, ycomp3, ycomp4, ycomp5];
 
     zcomp1 = 0;
-    zcomp2 = L3*sin(theta2)*sin(theta3) - L2*sin(theta2) - L3*cos(theta2)*cos(theta3) - (cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)))*(L4 + L5);
-    zcomp3 = L3*sin(theta2)*sin(theta3) - L3*cos(theta2)*cos(theta3) - (cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)))*(L4 + L5);
-    zcomp4 = -(cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)))*(L4 + L5);
+    zcomp2 = L3*sin(theta2)*sin(theta3) - L2*sin(theta2) - L6*(cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2))) - L3*cos(theta2)*cos(theta3) - (cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)))*(L4 + L5);
+    zcomp3 = L3*sin(theta2)*sin(theta3) - L6*(cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2))) - L3*cos(theta2)*cos(theta3) - (cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)))*(L4 + L5);
+    zcomp4 = - (cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)))*(L4 + L5) - L6*(cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)));
     zcomp5 = 0;
     zdiff = [zcomp1, zcomp2, zcomp3, zcomp4, zcomp5];
 
 elseif (n == 4)
-    xcomp1 = L3*sin(theta1)*sin(theta2)*sin(theta3) - L3*cos(theta2)*cos(theta3)*sin(theta1) - L2*cos(theta2)*sin(theta1);
-    xcomp2 =  - L2*cos(theta1)*sin(theta2) - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
-    xcomp3 = - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
-    xcomp4 = 0;
+    xcomp1 = (cos(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)) + sin(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)))*(L4 + L5) - L2*sin(theta1)*sin(theta2) - L3*cos(theta2)*cos(theta3)*sin(theta1) + L3*sin(theta1)*sin(theta2)*sin(theta3);
+    xcomp2 = L2*cos(theta1)*cos(theta2) - (cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)))*(L4 + L5) - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
+    xcomp3 = - (cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)))*(L4 + L5) - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
+    xcomp4 = -(cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)))*(L4 + L5);
     xdiff = [xcomp1, xcomp2, xcomp3, xcomp4, 0];
     
-    ycomp1 = L2*cos(theta1)*cos(theta2) + L3*cos(theta1)*cos(theta2)*cos(theta3) - L3*cos(theta1)*sin(theta2)*sin(theta3);
-    ycomp2 = - L2*sin(theta1)*sin(theta2) - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
-    ycomp3 = - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
-    ycomp4 = 0;
+    ycomp1 = L2*cos(theta1)*sin(theta2) - (cos(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)) + sin(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)))*(L4 + L5) + L3*cos(theta1)*cos(theta2)*cos(theta3) - L3*cos(theta1)*sin(theta2)*sin(theta3);
+    ycomp2 = L2*cos(theta2)*sin(theta1) - (cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)))*(L4 + L5) - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
+    ycomp3 = - (cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)))*(L4 + L5) - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
+    ycomp4 = -(cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)))*(L4 + L5);
     ydiff = [ycomp1, ycomp2, ycomp3, ycomp4, 0];
     
     zcomp1 = 0;
-    zcomp2 = L3*sin(theta2)*sin(theta3) - L3*cos(theta2)*cos(theta3) - L2*sin(theta2);
-    zcomp3 = L3*sin(theta2)*sin(theta3) - L3*cos(theta2)*cos(theta3);
-    zcomp4 = 0;
+    zcomp2 = L3*sin(theta2)*sin(theta3) - L2*sin(theta2) - L3*cos(theta2)*cos(theta3) - (cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)))*(L4 + L5);
+    zcomp3 = L3*sin(theta2)*sin(theta3) - L3*cos(theta2)*cos(theta3) - (cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)))*(L4 + L5);
+    zcomp4 = -(cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)))*(L4 + L5);
     zdiff = [zcomp1, zcomp2, zcomp3, zcomp4, 0]; 
     
 elseif (n == 3)
-    xcomp1 = L3*sin(theta1)*sin(theta2)*sin(theta3) - L3*cos(theta2)*cos(theta3)*sin(theta1) - L2*cos(theta2)*sin(theta1);
-    xcomp2 = - L2*cos(theta1)*sin(theta2) - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
+    xcomp1 = L3*sin(theta1)*sin(theta2)*sin(theta3) - L3*cos(theta2)*cos(theta3)*sin(theta1) - L2*sin(theta1)*sin(theta2);
+    xcomp2 = L2*cos(theta1)*cos(theta2) - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
     xcomp3 = - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
     xdiff = [xcomp1, xcomp2, xcomp3, 0, 0];
     
-    ycomp1 = L2*cos(theta1)*cos(theta2) + L3*cos(theta1)*cos(theta2)*cos(theta3) - L3*cos(theta1)*sin(theta2)*sin(theta3);
-    ycomp2 = - L2*sin(theta1)*sin(theta2) - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
+    ycomp1 = L2*cos(theta1)*sin(theta2) + L3*cos(theta1)*cos(theta2)*cos(theta3) - L3*cos(theta1)*sin(theta2)*sin(theta3);
+    ycomp2 = L2*cos(theta2)*sin(theta1) - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2)
     ycomp3 = - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
     ydiff = [ycomp1, ycomp2, ycomp3, 0, 0];
     
     zcomp1 = 0;
-    zcomp2 = L3*sin(theta2)*sin(theta3) - L3*cos(theta2)*cos(theta3) - L2*sin(theta2);
+    zcomp2 = L3*sin(theta2)*sin(theta3) - L3*cos(theta2)*cos(theta3) - L2*sin(theta2)
     zcomp3 = L3*sin(theta2)*sin(theta3) - L3*cos(theta2)*cos(theta3);
     zdiff = [zcomp1, zcomp2, zcomp3, 0, 0];
     
 elseif (n == 2)
-    xcomp1 = -L2*cos(theta2)*sin(theta1);
-    xcomp2 = -L2*cos(theta1)*sin(theta2);
+    xcomp1 = L3*sin(theta1)*sin(theta2)*sin(theta3) - L3*cos(theta2)*cos(theta3)*sin(theta1) - L2*sin(theta1)*sin(theta2);
+    xcomp2 = L2*cos(theta1)*cos(theta2) - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
     xdiff = [xcomp1, xcomp2, 0, 0, 0];
     
-    ycomp1 = L2*cos(theta1)*cos(theta2);
-    ycomp2 = -L2*sin(theta1)*sin(theta2);
+    ycomp1 = L2*cos(theta1)*sin(theta2) + L3*cos(theta1)*cos(theta2)*cos(theta3) - L3*cos(theta1)*sin(theta2)*sin(theta3);
+    ycomp2 = L2*cos(theta2)*sin(theta1) - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
     ydiff = [ycomp1, ycomp2, 0, 0, 0];
     
     zcomp1 = 0;
-    zcomp2 = -L2*sin(theta2);
+    zcomp2 = L3*sin(theta2)*sin(theta3) - L3*cos(theta2)*cos(theta3) - L2*sin(theta2);
     zdiff = [zcomp1, zcomp2, 0, 0, 0];
     
 elseif (n == 1)
-    xdiff = [0, 0, 0, 0, 0];   
-    ydiff = [0, 0, 0, 0, 0];  
-    zdiff = [0, 0, 0, 0, 0];
+    xcomp1 = -L2*sin(theta1)*sin(theta2);
+    xdiff = [xcomp1, 0, 0, 0, 0];   
+    
+    ycomp1 = L2*cos(theta1)*sin(theta2);
+    ydiff = [ycomp1, 0, 0, 0, 0];  
+    
+    zcomp1 = 0;
+    zdiff = [zcomp1, 0, 0, 0, 0];
 end
 
 Jacobian_v = [xdiff; ydiff; zdiff];
