@@ -1,24 +1,12 @@
-function velocity = fk_velocity(q)
-% Call the jacobian function to retrieve the symbolic jacobian matrix
-[J_sym, qdot] = jacobian;
+q = [1 0.3 1 0.1 .5];
+joint_vel = [2 3 4 1 2];
+velocity = find_fk(q, joint_vel)
 
-% Substitute for following values in the Jacobian matrix
-theta1 = q(1);
-theta2 = q(2);
-theta3 = q(3);
-theta4 = q(4);
-theta5 = q(5);
+function velocity = find_fk(q, joint_vel)
+% Call the jacobian function to retrieve the jacobian matrix for robot's
+% current pose
+J = jacobian(q)
 
-% Fill correct values for L1, L2, L3, L4, L5 and L6
-L1 = 1;
-L2 = 1;
-L3 = 1;
-L4 = 1;
-L5 = 1;
-L6 = 1;
-
-syms t reals
-
-velocity = subs(J_sym)*qdot;
-
+% Is qdot the same as q in body_vel = J(q)*qdot? Is this correct?
+velocity = J*joint_vel';
 end

@@ -1,6 +1,20 @@
-function J = jacobian
+function J = jacobian(q)
 
-syms theta1 theta2 theta3 theta4 theta5 L1 L2 L3 L4 L5 L6 reals
+% Modify theta names
+theta1 = q(1);
+theta2 = q(2);
+theta3 = q(3);
+theta4 = q(4);
+theta5 = q(5);
+
+L1 = 76.2;
+L2 = 146.05;
+L3 = 184.15;
+L4 = 0;
+L5 = 89;
+L6 = 0;
+
+% syms theta1 theta2 theta3 theta4 theta5 L1 L2 L3 L4 L5 L6 reals
 
 %Frame 1 w.r.t Frame 0
 A1 = [cos(theta1)    0  -sin(theta1) 0;
@@ -11,20 +25,20 @@ A1 = [cos(theta1)    0  -sin(theta1) 0;
 %Frame 2 w.r.t Frame 1          
 A2 = [ sin(theta2)  cos(theta2)  0   L2*cos(theta2);
       -cos(theta2)  sin(theta2)  0   L2*-cos(theta2);
-         0    0    1      0;
-         0    0    0      1];
+         0              0        1          0;
+         0              0        0          1];
 
 %Frame 3 w.r.t Frame 2
 A3 = [-sin(theta3) -cos(theta3)  0   L3*-sin(theta3);
       cos(theta3)  -sin(theta3)  0   L3*cos(theta3);
-       0      0    1      0;
-       0      0    0      1];
+       0                0        1          0;
+       0                0        0          1];
 
 %Frame 4 w.r.t Frame 3
 A4 = [sin(theta4)   0   cos(theta4)   0;
       -cos(theta4)  0   sin(theta4)   0;
-        0   -1    0     0;
-        0    0    0     1];
+        0           -1        0       0;
+        0           0         0       1];
     
 %Frame 5 w.r.t Frame 4
 A5 = [cos(theta5) -sin(theta5)  0        0;
@@ -44,22 +58,36 @@ T(:,:,2) = A2;
 T(:,:,3) = A3;
 T(:,:,4) = A4;
 T(:,:,5) = A5;
-T(:,:,6) = A6;
  
-% Find final transformation matrix for Lynx
-Tnew = A1*A2*A3*A4*A5*A6;
+% % Find final transformation matrix for Lynx
+% Tnew = A1*A2*A3*A4*A5*A6;
 
-% Holds translations of transformation matrices
-translation = Tnew(1:3,4);
+% % Holds translations of transformation matrices
+% translation = Tnew(1:3,4);
 
 %% Finding Jacobian for forward linear velocity kinematics
-xdiff = [diff(translation(1),theta1), diff(translation(1),theta2), diff(translation(1),theta3), diff(translation(1),theta4), diff(translation(1),theta5)];
-ydiff = [diff(translation(2),theta1), diff(translation(2),theta2), diff(translation(2),theta3), diff(translation(2),theta4), diff(translation(2),theta5)];
-zdiff = [diff(translation(3),theta1), diff(translation(3),theta2), diff(translation(3),theta3), diff(translation(3),theta4), diff(translation(3),theta5)];
+% xdiff = [diff(translation(1),theta1), diff(translation(1),theta2), diff(translation(1),theta3), diff(translation(1),theta4), 0];
+% ydiff = [diff(translation(2),theta1), diff(translation(2),theta2), diff(translation(2),theta3), diff(translation(2),theta4), 0];
+% zdiff = [diff(translation(3),theta1), diff(translation(3),theta2), diff(translation(3),theta3), diff(translation(3),theta4), 0];
+
+xcomp1 = (cos(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)) + sin(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)))*(L4 + L5) + L6*(cos(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)) + sin(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2))) - L2*cos(theta2)*sin(theta1) - L3*cos(theta2)*cos(theta3)*sin(theta1) + L3*sin(theta1)*sin(theta2)*sin(theta3);
+xcomp2 = - L6*(cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3))) - (cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)))*(L4 + L5) - L2*cos(theta1)*sin(theta2) - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
+xcomp3 = - L6*(cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3))) - (cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)))*(L4 + L5) - L3*cos(theta1)*cos(theta2)*sin(theta3) - L3*cos(theta1)*cos(theta3)*sin(theta2);
+xcomp4 = - L6*(cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3))) - (cos(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)) - sin(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)))*(L4 + L5);
+xdiff = [xcomp1, xcomp2, xcomp3, xcomp4, 0];
+
+ycomp1 = L2*cos(theta1)*cos(theta2) - (cos(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)) + sin(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2)))*(L4 + L5) - L6*(cos(theta4)*(cos(theta1)*sin(theta2)*sin(theta3) - cos(theta1)*cos(theta2)*cos(theta3)) + sin(theta4)*(cos(theta1)*cos(theta2)*sin(theta3) + cos(theta1)*cos(theta3)*sin(theta2))) + L3*cos(theta1)*cos(theta2)*cos(theta3) - L3*cos(theta1)*sin(theta2)*sin(theta3);
+ycomp2 = - (cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)))*(L4 + L5) - L6*(cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1))) - L2*sin(theta1)*sin(theta2) - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
+ycomp3 = - (cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)))*(L4 + L5) - L6*(cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1))) - L3*cos(theta2)*sin(theta1)*sin(theta3) - L3*cos(theta3)*sin(theta1)*sin(theta2);
+ycomp4 = - (cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)))*(L4 + L5) - L6*(cos(theta4)*(cos(theta2)*sin(theta1)*sin(theta3) + cos(theta3)*sin(theta1)*sin(theta2)) - sin(theta4)*(sin(theta1)*sin(theta2)*sin(theta3) - cos(theta2)*cos(theta3)*sin(theta1)));
+ydiff = [ycomp1, ycomp2, ycomp3, ycomp4, 0];
+
+zcomp2 = L3*sin(theta2)*sin(theta3) - L2*sin(theta2) - L6*(cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2))) - L3*cos(theta2)*cos(theta3) - (cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)))*(L4 + L5);
+zcomp3 = L3*sin(theta2)*sin(theta3) - L6*(cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2))) - L3*cos(theta2)*cos(theta3) - (cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)))*(L4 + L5);
+zcomp4 = - (cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)))*(L4 + L5) - L6*(cos(theta4)*(cos(theta2)*cos(theta3) - sin(theta2)*sin(theta3)) - sin(theta4)*(cos(theta2)*sin(theta3) + cos(theta3)*sin(theta2)));
+zdiff = [0, zcomp2, zcomp3, zcomp4, 0];
 
 Jacobian_v = [xdiff; ydiff; zdiff];
-
-% pretty(Jacobian_v)
 
 %% Finding Jacobian for forward angular velocity kinematics
 
@@ -76,8 +104,6 @@ omega_4 = R_0_3 * z_for_omega;
 omega_5 = R_0_4 * z_for_omega;
 
 Jacobian_w = [omega_1, omega_2, omega_3, omega_4, omega_5];
-
-% pretty(Jacobian_v)
 
 %% Finding final Jacobian and body velocity
 
