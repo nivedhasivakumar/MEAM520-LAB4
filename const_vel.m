@@ -1,24 +1,19 @@
-%% Evaluation 1
+%% Evaluation 1 section
 lynxStart();
 
-for t = 1:0.1:100
+for t = 1:0.5:100
    q = [pi/6*t pi/6 pi/6 pi/6 pi/6 10];
    [X, T] = updateQ(q);
-   x = X(6,1)/12.5;
-   y = X(6,2)/12.5;
-   z = X(6,3)/12.5;
-   scatter3(x, y, z);
-   hold on;
    lynxServoSim(q);
 end
 
-%% Evaluation 3
+%% Evaluation 3 section
+qinit = 0;
+joint_vel = [1 1 1 1 1 1];
+lynxStart();
 
-init_q = [pi/4 pi/4 pi/4 pi/4 pi/4 10];
-
-for t = 1:0.1:100
-   q = [pi/4*t pi/4*t pi/4*t pi/4*t pi/4*t 10];
-   [X, T] = updateQ(q);
+for t = 1:0.1:100       
+   q = qinit + joint_vel*t; 
    x = X(6,1);
    y = X(6,2);
    z = X(6,3);
@@ -32,8 +27,8 @@ end
 
 lynxStart();
 q = [0 0 -pi/2 0 0 0]; 
-qdot = [0 0 1 0 0 0];
-body_velocity = ik_velocity(q);
+body_velocity = [1 1 1 1 1 1];
+qdot = ik_velocity(q, body_velocity);
 
 for t = 1:0.1:100
    q = q + qdot*t;
